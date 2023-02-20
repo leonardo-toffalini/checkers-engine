@@ -206,6 +206,7 @@ class Board():
 
 
     #* returns a numeric value representing the board position
+    #TODO add heatmap
     def utility(self):
         score = 0
         for i in range(8):
