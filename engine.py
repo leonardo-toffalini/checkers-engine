@@ -33,11 +33,15 @@ class Board():
 
     def _convert(self, x):
         if x == -1:
-            return "X"
+            return "x"
         elif x == 1:
-            return "O"
+            return "o"
         elif x == 0:
             return " "
+        elif x == -2:
+            return "X"
+        elif x == 2:
+            return "O"
         else:
             return "E"
 
