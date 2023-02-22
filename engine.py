@@ -372,6 +372,8 @@ def main():
             print("White won")
             break
 
+    # nagyon szeretem a petyit
+
 
 if __name__ == "__main__":
     main()
