@@ -1,4 +1,5 @@
 import copy
+import time
 
 '''
 make a class called Board
@@ -12,23 +13,23 @@ make a function that gets all the legal jumps
 
 
 class Board():
-    def __init__(self, board=None):
+    def __init__(self, board=None, player=1):
         if board == None:
             self.board = [
                 # 0   1   2   3   4   5   6   7
-                [ 0, -1,  0, -1,  0, -1,  0, -1], # 0
-                [-1,  0, -1,  0, -1,  0, -1,  0], # 1
-                [ 0, -1,  0, -1,  0, -1,  0, -1], # 2
-                [ 0,  0,  0,  0,  0,  0,  0,  0], # 3
-                [ 0,  0,  0,  0,  0,  0,  0,  0], # 4
-                [+1,  0, +1,  0, +1,  0, +1,  0], # 5
-                [ 0, +1,  0, +1,  0, +1,  0, +1], # 6
-                [+1,  0, +1,  0, +1,  0, +1,  0]  # 7
+                [0, -1,  0, -1,  0, -1,  0, -1],  # 0
+                [-1, 0, -1,  0, -1,  0, -1, 0],  # 1
+                [0, -1,  0, -1,  0, -1,  0, -1],  # 2
+                [0,  0,  0,  0,  0,  0,  0,  0],  # 3
+                [0,  0,  0,  0,  0,  0,  0,  0],  # 4
+                [+1, 0, +1,  0, +1,  0, +1, 0],  # 5
+                [0, +1,  0, +1,  0, +1,  0, +1],  # 6
+                [+1, 0, +1,  0, +1,  0, +1,  0]  # 7
             ]
         else:
             self.board = copy.deepcopy(board)
 
-        self.turn = 1 # black starts
+        self.turn = player  # black starts
 
     def _convert(self, x):
         if x == -1:
@@ -40,7 +41,7 @@ class Board():
         else:
             return "E"
 
-    #* prints a more human friendly board representation
+    # * prints a more human friendly board representation
     def display_board(self):
         #                                0                                1                                2                                3                               4                               5                               6                               7
         print(f"{self._convert(self.board[0][0])}|{self._convert(self.board[0][1])}|{self._convert(self.board[0][2])}|{self._convert(self.board[0][3])}|{self._convert(self.board[0][4])}|{self._convert(self.board[0][5])}|{self._convert(self.board[0][6])}|{self._convert(self.board[0][7])}")
@@ -60,13 +61,13 @@ class Board():
         print(f"{self._convert(self.board[7][0])}|{self._convert(self.board[7][1])}|{self._convert(self.board[7][2])}|{self._convert(self.board[7][3])}|{self._convert(self.board[7][4])}|{self._convert(self.board[7][5])}|{self._convert(self.board[7][6])}|{self._convert(self.board[7][7])}")
         print("----------------")
 
+    # * returns a list of tuples of all the available moves for a given square on the board
 
-    #* returns a list of tuples of all the available moves for a given square on the board
     def getMoves(self, x, y):
         moves = []
         # check all the empty squares that are on the board and can be accessed from (x, y)
-        # if self.turn == -1: white to move and 
-        # if the piece on (x, y) is a man or is a king (kings can move like man but man cant move like kings)
+        # if self.turn == -1: white to move and
+        # if the piece on (x, y) is a man or is a king (kings can move like man but men cant move like kings)
         if self.board[x][y] in (self.turn, 2*self.turn):
             # to the right diagnoally (up if black, down if white)
             # check if target square is on the board
@@ -95,8 +96,8 @@ class Board():
                     moves.append((x+self.turn, y-1))
         return moves
 
+    # * returns a list of tuples of all the available captures (jumps) for a given square on the board
 
-    #* returns a list of tuples of all the available captures (jumps) for a given square on the board
     def getJumps(self, x, y):
         jumps = []
         # if the piece on (x, y) is a man or a king
@@ -123,12 +124,12 @@ class Board():
                     jumps.append((x+2*self.turn, y-2))
         return jumps
 
+    # * validiates the input move, if its legal it updates the board accordingly
 
-    #* validiates the input move, if its legal it updates the board accordingly
     def move(self, x, y, newX, newY):
         # stores al the availeble jumps in a dictionary
         jumpers = dict()
-        
+
         # generate all possible captures
         for i in range(8):
             for j in range(8):
@@ -137,15 +138,15 @@ class Board():
 
         # if there are available captures
         if len(jumpers) > 0:
-            #print(jumpers)
+            # print(jumpers)
             if (newX, newY) in jumpers[(x, y)]:
                 self.board[x][y] = 0
                 self.board[newX][newY] = self.turn
                 self.board[int((x+newX)/2)][int((y+newY)/2)] = 0
-                
+
                 self.makeKing()
-                
-                print(self.getJumps(newX, newY))
+
+                # print(self.getJumps(newX, newY))
                 if len(self.getJumps(newX, newY)) == 1:
                     self.move(newX, newY, self.getJumps(newX, newY)[0][0], self.getJumps(newX, newY)[0][1])
                 elif len(self.getJumps(newX, newY)) == 2:
@@ -173,8 +174,8 @@ class Board():
             else:
                 print("invalid move, either there isnt a piece there or the piece cannot move to the given position")
 
+    # * converts last row pieces to kings
 
-    #* converts last row pieces to kings
     def makeKing(self):
         for i in range(8):
             if self.board[0][i] == +1:
@@ -182,8 +183,8 @@ class Board():
             if self.board[7][i] == -1:
                 self.board[7][i] = -2
 
+    # * if there is a winner returns self.turn else it returns 0
 
-    #* if there is a winner returns self.turn else it returns 0
     def checkWinner(self):
         blacks = 0
         whites = 0
@@ -204,9 +205,9 @@ class Board():
         else:
             return 0
 
+    # * returns a numeric value representing the board position
+    # TODO add heatmap
 
-    #* returns a numeric value representing the board position
-    #TODO add heatmap
     def utility(self):
         score = 0
         for i in range(8):
@@ -214,13 +215,14 @@ class Board():
                 score += self.board[i][j]
         return score
 
+    # * implementation of the minimax algorithm
 
-    #* implementation of the minimax algorithm
     def minimax(self, depth, player):
-        #print("I've been called")
+        # print(depth)
+        # print("I've been called")
         if self.checkWinner():
             return self.checkWinner()
-        
+
         if depth == 0:
             return self.utility()
 
@@ -229,43 +231,54 @@ class Board():
         else:
             value = float('inf')
 
+        jumps = dict()
+        moves = dict()
 
         # generate all legal moves
         for i in range(8):
             for j in range(8):
-                jumps = self.getJumps(i, j)
-                moves = self.getMoves(i, j)
-                if jumps:
-                    for jump_move in jumps:
-                        # birth a child
-                        child = Board(self.board)
-                        child.move(i, j, jump_move[0], jump_move[1])
-                        score = child.minimax(depth-1, -1*player)
+                if self.getJumps(i, j):
+                    jumps[(i, j)] = self.getJumps(i, j)
+                if self.getMoves(i, j):
+                    moves[(i, j)] = self.getMoves(i, j)
 
-                        if player == 1:
-                            value = max(value, score)
-                        elif player == -1:
-                            value = min(value, score)
-                elif moves:
-                    for move_move in moves:
-                        child = Board(self.board)
-                        child.move(i, j, move_move[0], move_move[1])
-                        score = child.minimax(depth-1, -1*player)
+        #print(f'jumps: {jumps}')
+        #print(f'moves: {moves}')
 
-                        if player == 1:
-                            value = max(value, score)
-                        elif player == -1:
-                            value = min(value, score)
+        if jumps:
+            for key in jumps:
+                # birth a child
+                for val in jumps[key]:
+                    child = Board(board=self.board, player=player)
+                    child.move(key[0], key[1], val[0], val[1])
+                    score = child.minimax(depth-1, -1*player)
 
-                
+                    if player == 1:
+                        value = max(value, score)
+                    elif player == -1:
+                        value = min(value, score)
+        elif moves:
+            for key in moves:
+                # print(f'move_move: {key}')
+                # print(f'moves[key]: {moves[key]}')
+                for val in moves[key]:
+                    # print(f'val: {val}')
+                    # print(f'asdasdasd: {key[0], key[1], val[0], val[1]}')
+                    child = Board(board=self.board, player=player)
+                    child.move(key[0], key[1], val[0], val[1])
+                    score = child.minimax(depth-1, -1*player)
+
+                    if player == 1:
+                        value = max(value, score)
+                    elif player == -1:
+                        value = min(value, score)
+
                 # print(f"value: {value}")
-        
+
         return value
 
-        
-
-    #* returns the best move according to the minimax algorithm
-    #TODO
+    # * returns the best move according to the minimax algorithm
+    # TODO
     '''
     def get_best_move(self, depth, player):
         if player == 1:
@@ -307,7 +320,8 @@ class Board():
         return best_move
     '''
 
-#* test
+
+# * test
 '''
 board = Board()
 print("Moves:")
@@ -328,17 +342,22 @@ print(board.getJumps(5, 2))
 #print(board.move(5, 0, 4, 1))
 '''
 
+
 def main():
     board = Board()
     while True:
         board.display_board()
-        print(f'minimax: {board.minimax(2, 1)}')
+        # time = time.time()
+        print(f'minimax: {board.minimax(6, 1)}')
+        # print(f'it tooek {time.time() - time} to run')
         print(f'utility: {board.utility()}')
         print(f"turn: {board._convert(board.turn)}")
         x = int(input("Enter vertical cooardinate of the piece you wish to move "))
         y = int(input("Enter horizontal cooardinate of the piece you wish to move "))
-        newX = int(input("Enter vertical cooardinate of the spot you wish to move to "))
-        newY = int(input("Enter horizontal cooardinate of the spot you wish to move to "))
+        newX = int(
+            input("Enter vertical cooardinate of the spot you wish to move to "))
+        newY = int(
+            input("Enter horizontal cooardinate of the spot you wish to move to "))
 
         board.move(x, y, newX, newY)
 
@@ -348,8 +367,7 @@ def main():
         elif board.checkWinner() == -float('inf'):
             print("White won")
             break
-            
+
 
 if __name__ == "__main__":
     main()
-
