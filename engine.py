@@ -124,7 +124,7 @@ class Board():
                 if self.board[x+self.turn][y+1] == -1*self.turn and self.board[x+2*self.turn][y+2] == 0:
                     jumps.append((x+2*self.turn, y+2))
             if (x+2*self.turn) in range(8) and (y-2) in range(8):
-                if self.board[x+self.turn][y+1] == -1*self.turn and self.board[x+2*self.turn][y-2] == 0:
+                if self.board[x+self.turn][y-1] == -1*self.turn and self.board[x+2*self.turn][y-2] == 0:
                     jumps.append((x+2*self.turn, y-2))
         return jumps
 
@@ -351,17 +351,15 @@ def main():
     board = Board()
     while True:
         board.display_board()
-        # time = time.time()
+        start = time.time()
         print(f'minimax: {board.minimax(6, 1)}')
-        # print(f'it tooek {time.time() - time} to run')
+        print(f'it took {time.time() - start} seconds to run')
         print(f'utility: {board.utility()}')
         print(f"turn: {board._convert(board.turn)}")
         x = int(input("Enter vertical cooardinate of the piece you wish to move "))
         y = int(input("Enter horizontal cooardinate of the piece you wish to move "))
-        newX = int(
-            input("Enter vertical cooardinate of the spot you wish to move to "))
-        newY = int(
-            input("Enter horizontal cooardinate of the spot you wish to move to "))
+        newX = int(input("Enter vertical cooardinate of the spot you wish to move to "))
+        newY = int(input("Enter horizontal cooardinate of the spot you wish to move to "))
 
         board.move(x, y, newX, newY)
 
