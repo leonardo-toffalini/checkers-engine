@@ -124,7 +124,7 @@ class Board():
                 if self.board[x+self.turn][y+1] == -1*self.turn and self.board[x+2*self.turn][y+2] == 0:
                     jumps.append((x+2*self.turn, y+2))
             if (x+2*self.turn) in range(8) and (y-2) in range(8):
-                if self.board[x+self.turn][y+1] == -1*self.turn and self.board[x+2*self.turn][y-2] == 0:
+                if self.board[x+self.turn][y-1] == -1*self.turn and self.board[x+2*self.turn][y-2] == 0:
                     jumps.append((x+2*self.turn, y-2))
         return jumps
 
@@ -224,11 +224,14 @@ class Board():
     def minimax(self, depth, player):
         # print(depth)
         # print("I've been called")
+        
+        best_move = (-1, -1, -1, -1)
+
         if self.checkWinner():
             return self.checkWinner()
 
         if depth == 0:
-            return self.utility()
+            return (self.utility(), best_move)
 
         if player == 1:
             value = -float('inf')
@@ -255,12 +258,17 @@ class Board():
                 for val in jumps[key]:
                     child = Board(board=self.board, player=player)
                     child.move(key[0], key[1], val[0], val[1])
-                    score = child.minimax(depth-1, -1*player)
+                    curr_move = (key[0], key[1], val[0], val[1])
+                    score = child.minimax(depth-1, -1*player)[0]
 
                     if player == 1:
-                        value = max(value, score)
+                        if score > value:
+                            value = score
+                            best_move = curr_move
                     elif player == -1:
-                        value = min(value, score)
+                        if score < value:
+                            value = score
+                            best_move = curr_move
         elif moves:
             for key in moves:
                 # print(f'move_move: {key}')
@@ -270,16 +278,22 @@ class Board():
                     # print(f'asdasdasd: {key[0], key[1], val[0], val[1]}')
                     child = Board(board=self.board, player=player)
                     child.move(key[0], key[1], val[0], val[1])
-                    score = child.minimax(depth-1, -1*player)
+                    curr_move = (key[0], key[1], val[0], val[1])
+                    score = child.minimax(depth-1, -1*player)[0]
+                    #print(score)
 
                     if player == 1:
-                        value = max(value, score)
+                        if score > value:
+                            value = score
+                            best_move = curr_move
                     elif player == -1:
-                        value = min(value, score)
+                        if score < value:
+                            value = score
+                            best_move = curr_move
 
                 # print(f"value: {value}")
 
-        return value
+        return (value, best_move)
 
     # * returns the best move according to the minimax algorithm
     # TODO
@@ -351,17 +365,15 @@ def main():
     board = Board()
     while True:
         board.display_board()
-        # time = time.time()
+        start = time.time()
         print(f'minimax: {board.minimax(6, 1)}')
-        # print(f'it tooek {time.time() - time} to run')
+        print(f'it took {time.time() - start} seconds to run')
         print(f'utility: {board.utility()}')
         print(f"turn: {board._convert(board.turn)}")
         x = int(input("Enter vertical cooardinate of the piece you wish to move "))
         y = int(input("Enter horizontal cooardinate of the piece you wish to move "))
-        newX = int(
-            input("Enter vertical cooardinate of the spot you wish to move to "))
-        newY = int(
-            input("Enter horizontal cooardinate of the spot you wish to move to "))
+        newX = int(input("Enter vertical cooardinate of the spot you wish to move to "))
+        newY = int(input("Enter horizontal cooardinate of the spot you wish to move to "))
 
         board.move(x, y, newX, newY)
 
