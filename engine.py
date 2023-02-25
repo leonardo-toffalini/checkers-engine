@@ -231,7 +231,7 @@ class Board():
             return self.checkWinner()
 
         if depth == 0:
-            return (self.utility(), best_move)
+            return self.utility()
 
         if player == 1:
             value = -float('inf')
@@ -259,16 +259,14 @@ class Board():
                     child = Board(board=self.board, player=player)
                     child.move(key[0], key[1], val[0], val[1])
                     curr_move = (key[0], key[1], val[0], val[1])
-                    score = child.minimax(depth-1, -1*player)[0]
+                    score = child.minimax(depth-1, -1*player)
 
                     if player == 1:
                         if score > value:
                             value = score
-                            best_move = curr_move
                     elif player == -1:
                         if score < value:
                             value = score
-                            best_move = curr_move
         elif moves:
             for key in moves:
                 # print(f'move_move: {key}')
@@ -279,21 +277,19 @@ class Board():
                     child = Board(board=self.board, player=player)
                     child.move(key[0], key[1], val[0], val[1])
                     curr_move = (key[0], key[1], val[0], val[1])
-                    score = child.minimax(depth-1, -1*player)[0]
+                    score = child.minimax(depth-1, -1*player)
                     #print(score)
 
                     if player == 1:
                         if score > value:
                             value = score
-                            best_move = curr_move
                     elif player == -1:
                         if score < value:
                             value = score
-                            best_move = curr_move
 
                 # print(f"value: {value}")
 
-        return (value, best_move)
+        return value
 
     # * returns the best move according to the minimax algorithm
     # TODO
