@@ -1,16 +1,6 @@
 import copy
 import time
 
-'''
-make a class called Board
-    black = 1
-    white = -1
-    king = +-2
-
-make a function that gets all the legal moves
-make a function that gets all the legal jumps
-'''
-
 
 class Board():
     def __init__(self, board=None, player=1):
