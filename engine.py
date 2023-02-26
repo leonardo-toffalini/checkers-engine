@@ -1,16 +1,6 @@
 import copy
 import time
 
-'''
-make a class called Board
-    black = 1
-    white = -1
-    king = +-2
-
-make a function that gets all the legal moves
-make a function that gets all the legal jumps
-'''
-
 
 class Board():
     def __init__(self, board=None, player=1):
@@ -130,7 +120,7 @@ class Board():
 
     # * validiates the input move, if its legal it updates the board accordingly
 
-    def move(self, x, y, newX, newY):
+    def move(self, x, y, newX, newY, comp=False):
         # stores al the availeble jumps in a dictionary
         jumpers = dict()
 
@@ -154,17 +144,20 @@ class Board():
                 if len(self.getJumps(newX, newY)) == 1:
                     self.move(newX, newY, self.getJumps(newX, newY)[0][0], self.getJumps(newX, newY)[0][1])
                 elif len(self.getJumps(newX, newY)) == 2:
-                    self.display_board()
-                    direction = str(input("You have two possible captures, would you like to go 'right' or 'left'? "))
-                    for i in range(10):
-                        if direction == 'right':
-                            self.move(newX, newY, self.getJumps(newX, newY)[0][0], self.getJumps(newX, newY)[0][1])
-                            break
-                        elif direction == 'left':
-                            self.move(newX, newY, self.getJumps(newX, newY)[1][0], self.getJumps(newX, newY)[1][1])
-                            break
-                        else:
-                            print("Not a valid direction, please enter 'left' or 'right'")
+                    if not comp:
+                        self.display_board()
+                        direction = str(input("You have two possible captures, would you like to go 'right' or 'left'? "))
+                        for i in range(10):
+                            if direction == 'right':
+                                self.move(newX, newY, self.getJumps(newX, newY)[0][0], self.getJumps(newX, newY)[0][1])
+                                break
+                            elif direction == 'left':
+                                self.move(newX, newY, self.getJumps(newX, newY)[1][0], self.getJumps(newX, newY)[1][1])
+                                break
+                            else:
+                                print("Not a valid direction, please enter 'left' or 'right'")
+                    else:
+                        pass
                 else:
                     self.turn = -self.turn
             else:
@@ -231,7 +224,7 @@ class Board():
             return self.checkWinner()
 
         if depth == 0:
-            return (self.utility(), best_move)
+            return self.utility()
 
         if player == 1:
             value = -float('inf')
@@ -244,22 +237,78 @@ class Board():
         # generate all legal moves
         for i in range(8):
             for j in range(8):
-                if self.getJumps(i, j):
-                    jumps[(i, j)] = self.getJumps(i, j)
-                if self.getMoves(i, j):
-                    moves[(i, j)] = self.getMoves(i, j)
+                if jump := self.getJumps(i, j):
+                    jumps[(i, j)] = jump
+                if move := self.getMoves(i, j):
+                    moves[(i, j)] = move
 
         #print(f'jumps: {jumps}')
         #print(f'moves: {moves}')
 
         if jumps:
             for key in jumps:
-                # birth a child
                 for val in jumps[key]:
                     child = Board(board=self.board, player=player)
-                    child.move(key[0], key[1], val[0], val[1])
+                    child.move(key[0], key[1], val[0], val[1], comp=True)
+                    score = child.minimax(depth-1, -1*player)
+
+                    if player == 1:
+                        if score > value:
+                            value = score
+                    elif player == -1:
+                        if score < value:
+                            value = score
+        elif moves:
+            for key in moves:
+                # print(f'move_move: {key}')
+                # print(f'moves[key]: {moves[key]}')
+                for val in moves[key]:
+                    # print(f'val: {val}')
+                    # print(f'asdasdasd: {key[0], key[1], val[0], val[1]}')
+                    child = Board(board=self.board, player=player)
+                    child.move(key[0], key[1], val[0], val[1], comp=True)
+                    score = child.minimax(depth-1, -1*player)
+                    #print(score)
+
+                    if player == 1:
+                        if score > value:
+                            value = score
+                    elif player == -1:
+                        if score < value:
+                            value = score
+
+                # print(f"value: {value}")
+
+        return value
+
+    # * returns the best move according to the minimax algorithm
+    # TODO
+    
+    def get_best_move(self, depth, player):
+        best_move = (-1, -1, -1, -1)
+
+        if player == 1:
+            value = -float('inf')
+        else:
+            value = float('inf')
+
+        moves = dict()
+        jumps = dict()
+
+        for i in range(8):
+            for j in range(8):
+                if jump := self.getJumps(i, j):
+                    jumps[(i, j)] = jump
+                if move := self.getMoves(i, j):
+                    moves[(i, j)] = move
+
+        if jumps:
+            for key in jumps:
+                for val in jumps[key]:
+                    child = Board(board=self.board, player=player)
+                    child.move(key[0], key[1], val[0], val[1], comp=True)
                     curr_move = (key[0], key[1], val[0], val[1])
-                    score = child.minimax(depth-1, -1*player)[0]
+                    score = child.minimax(depth-1, -1*player)
 
                     if player == 1:
                         if score > value:
@@ -269,6 +318,7 @@ class Board():
                         if score < value:
                             value = score
                             best_move = curr_move
+        
         elif moves:
             for key in moves:
                 # print(f'move_move: {key}')
@@ -277,9 +327,9 @@ class Board():
                     # print(f'val: {val}')
                     # print(f'asdasdasd: {key[0], key[1], val[0], val[1]}')
                     child = Board(board=self.board, player=player)
-                    child.move(key[0], key[1], val[0], val[1])
+                    child.move(key[0], key[1], val[0], val[1], comp=True)
+                    score = child.minimax(depth-1, -1*player)
                     curr_move = (key[0], key[1], val[0], val[1])
-                    score = child.minimax(depth-1, -1*player)[0]
                     #print(score)
 
                     if player == 1:
@@ -291,52 +341,8 @@ class Board():
                             value = score
                             best_move = curr_move
 
-                # print(f"value: {value}")
-
-        return (value, best_move)
-
-    # * returns the best move according to the minimax algorithm
-    # TODO
-    '''
-    def get_best_move(self, depth, player):
-        if player == 1:
-            value = -float('inf')
-        else:
-            value = float('inf')
-
-        best_move = (-1, -1, -1, -1)
-
-        score = value
-
-
-        for i in range(8):
-            for j in range(8):
-                if self.getJumps(i ,j):
-                    for jump_move in self.getJumps(i ,j):
-                        # make a temporary copy of the board
-                        temp = Board(self.board)
-                        current_move = (i, j, jump_move[0], jump_move[1])
-                        temp.move(i, j, jump_move[0], jump_move[1])
-                        score = temp.minimax(depth, player)
-                        # reset board to remporarily stored position
-                        #self.board = copy.deepcopy(temp)
-                else:
-                    for move in self.getMoves(i, j):
-                        temp = Board(self.board)
-                        current_move = (i, j, move[0], move[1])
-                        temp.move(i, j, move[0], move[1])
-                        score = temp.minimax(depth, player)
-                        #self.board = copy.deepcopy(temp)
-
-                if player == 1 and score > value:
-                    value = score
-                    best_move = current_move
-                elif player == -1 and score < value:
-                    value = score
-                    best_move = current_move
-
         return best_move
-    '''
+    
 
 
 # * test
@@ -365,9 +371,12 @@ def main():
     board = Board()
     while True:
         board.display_board()
-        start = time.time()
-        print(f'minimax: {board.minimax(6, 1)}')
-        print(f'it took {time.time() - start} seconds to run')
+        # t1 = time.time()
+        # print(f'minimax: {board.minimax(4, 1)}')
+        # print(f'it took {time.time() - t1} seconds to run')
+        t2 = time.time()
+        print(f'best_move: {board.get_best_move(5, 1)}')
+        print(f'it took {time.time() - t2} seconds to run')
         print(f'utility: {board.utility()}')
         print(f"turn: {board._convert(board.turn)}")
         x = int(input("Enter vertical cooardinate of the piece you wish to move "))
