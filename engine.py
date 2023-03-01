@@ -219,11 +219,15 @@ class Board():
     # * returns a numeric value representing the board position
     # TODO add heatmap
 
+    def _weighted_value(self, x, y):
+        return (5 + 7-x)*self.board[x][y] if self.board[x][y] in (1, -1) else 5*self.board[x][y]+10
+
+
     def utility(self):
         score = 0
         for i in range(8):
             for j in range(8):
-                score += self.board[i][j]
+                score += self._weighted_value(i, j)
         return score
 
     # * implementation of the minimax algorithm
