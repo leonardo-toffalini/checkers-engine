@@ -214,12 +214,7 @@ class Board():
 
     # * implementation of the minimax algorithm
 
-    def minimax(self, depth, player):
-        # print(depth)
-        # print("I've been called")
-        
-        best_move = (-1, -1, -1, -1)
-
+    def minimax(self, depth, alpha, beta, player):
         if self.checkWinner():
             return self.checkWinner()
 
@@ -242,42 +237,44 @@ class Board():
                 if move := self.getMoves(i, j):
                     moves[(i, j)] = move
 
-        #print(f'jumps: {jumps}')
-        #print(f'moves: {moves}')
-
         if jumps:
             for key in jumps:
                 for val in jumps[key]:
                     child = Board(board=self.board, player=player)
                     child.move(key[0], key[1], val[0], val[1], comp=True)
-                    score = child.minimax(depth-1, -1*player)
+                    score = child.minimax(depth-1, alpha, beta, -1*player)
 
                     if player == 1:
                         if score > value:
                             value = score
+                        if value > beta:
+                            break
+                        alpha = max(alpha, value)
                     elif player == -1:
                         if score < value:
                             value = score
+                        if value < alpha:
+                            break
+                        beta = min(beta, value)
         elif moves:
             for key in moves:
-                # print(f'move_move: {key}')
-                # print(f'moves[key]: {moves[key]}')
                 for val in moves[key]:
-                    # print(f'val: {val}')
-                    # print(f'asdasdasd: {key[0], key[1], val[0], val[1]}')
                     child = Board(board=self.board, player=player)
                     child.move(key[0], key[1], val[0], val[1], comp=True)
-                    score = child.minimax(depth-1, -1*player)
-                    #print(score)
+                    score = child.minimax(depth-1, alpha, beta, -1*player)
 
                     if player == 1:
                         if score > value:
                             value = score
+                        if value > beta:
+                            break
+                        alpha = max(alpha, value)
                     elif player == -1:
                         if score < value:
                             value = score
-
-                # print(f"value: {value}")
+                        if value < alpha:
+                            break
+                        beta = min(beta, value)
 
         return value
 
@@ -308,7 +305,7 @@ class Board():
                     child = Board(board=self.board, player=player)
                     child.move(key[0], key[1], val[0], val[1], comp=True)
                     curr_move = (key[0], key[1], val[0], val[1])
-                    score = child.minimax(depth-1, -1*player)
+                    score = child.minimax(depth-1, -float('inf'), float('inf'), -1*player)
 
                     if player == 1:
                         if score > value:
@@ -321,16 +318,11 @@ class Board():
         
         elif moves:
             for key in moves:
-                # print(f'move_move: {key}')
-                # print(f'moves[key]: {moves[key]}')
                 for val in moves[key]:
-                    # print(f'val: {val}')
-                    # print(f'asdasdasd: {key[0], key[1], val[0], val[1]}')
                     child = Board(board=self.board, player=player)
                     child.move(key[0], key[1], val[0], val[1], comp=True)
-                    score = child.minimax(depth-1, -1*player)
+                    score = child.minimax(depth-1, -float('inf'), float('inf'), -1*player)
                     curr_move = (key[0], key[1], val[0], val[1])
-                    #print(score)
 
                     if player == 1:
                         if score > value:
@@ -342,29 +334,7 @@ class Board():
                             best_move = curr_move
 
         return best_move
-    
 
-
-# * test
-'''
-board = Board()
-print("Moves:")
-for i in range(8):
-    for j in range(8):
-        print(f"({i}, {j}): {board.getMoves(i, j)}")
-print("----------------------------------------------------------------")
-print("Jumps:")
-for i in range(8):
-    for j in range(8):
-        print(f"({i}, {j}): {board.getJumps(i, j)}")
-
-print("Board:")
-board.display_board()
-
-print(board.getJumps(5, 2))
-
-#print(board.move(5, 0, 4, 1))
-'''
 
 
 def main():
@@ -375,7 +345,7 @@ def main():
         # print(f'minimax: {board.minimax(4, 1)}')
         # print(f'it took {time.time() - t1} seconds to run')
         t2 = time.time()
-        print(f'best_move: {board.get_best_move(5, 1)}')
+        print(f'best_move: {board.get_best_move(6, 1)}')
         print(f'it took {time.time() - t2} seconds to run')
         print(f'utility: {board.utility()}')
         print(f"turn: {board._convert(board.turn)}")
