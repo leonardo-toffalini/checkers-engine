@@ -35,6 +35,15 @@ class Board():
         else:
             return "E"
 
+
+    def _hash_pos(self):
+        result = ""
+        for i in range(8):
+            for j in range(8):
+                result += self._convert(self.board[i][j])
+        return result
+
+
     # * prints a more human friendly board representation
     def display_board(self):
         #                                0                                1                                2                                3                               4                               5                               6                               7
@@ -215,6 +224,8 @@ class Board():
     # * implementation of the minimax algorithm
 
     def minimax(self, depth, alpha, beta, player):
+        look_up_table = dict()
+
         if self.checkWinner():
             return self.checkWinner()
 
