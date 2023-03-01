@@ -3,8 +3,8 @@ import time
 
 
 class Board():
-    def __init__(self, board=None, player=1):
-        if board == None:
+    def __init__(self, board=None, player=1, look_up_table=None):
+        if board is None:
             self.board = [
                 # 0   1   2   3   4   5   6   7
                 [0, -1,  0, -1,  0, -1,  0, -1],  # 0
@@ -18,6 +18,11 @@ class Board():
             ]
         else:
             self.board = copy.deepcopy(board)
+
+        if look_up_table is None:
+            self.look_up_table = dict()
+        else:
+            self.look_up_table = look_up_table
 
         self.turn = player  # black starts
 
@@ -224,8 +229,6 @@ class Board():
     # * implementation of the minimax algorithm
 
     def minimax(self, depth, alpha, beta, player):
-        look_up_table = dict()
-
         if self.checkWinner():
             return self.checkWinner()
 
@@ -251,9 +254,13 @@ class Board():
         if jumps:
             for key in jumps:
                 for val in jumps[key]:
-                    child = Board(board=self.board, player=player)
+                    child = Board(board=self.board, player=player, look_up_table=self.look_up_table)
                     child.move(key[0], key[1], val[0], val[1], comp=True)
-                    score = child.minimax(depth-1, alpha, beta, -1*player)
+                    if (hashed_pos := child._hash_pos()) in child.look_up_table:
+                        score = child.look_up_table[hashed_pos]
+                    else:
+                        score = child.minimax(depth-1, alpha, beta, -1*player)
+                        child.look_up_table[hashed_pos] = score
 
                     if player == 1:
                         if score > value:
@@ -270,9 +277,13 @@ class Board():
         elif moves:
             for key in moves:
                 for val in moves[key]:
-                    child = Board(board=self.board, player=player)
+                    child = Board(board=self.board, player=player, look_up_table=self.look_up_table)
                     child.move(key[0], key[1], val[0], val[1], comp=True)
-                    score = child.minimax(depth-1, alpha, beta, -1*player)
+                    if (hashed_pos := child._hash_pos()) in child.look_up_table:
+                        score = child.look_up_table[hashed_pos]
+                    else:
+                        score = child.minimax(depth-1, alpha, beta, -1*player)
+                        child.look_up_table[hashed_pos] = score
 
                     if player == 1:
                         if score > value:
