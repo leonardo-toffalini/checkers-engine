@@ -3,7 +3,7 @@ import time
 
 
 class Board():
-    def __init__(self, board=None, player=1, look_up_table=None):
+    def __init__(self, board=None, player:int=1, look_up_table=None):
         if board is None:
             self.board = [
                 # 0   1   2   3   4   5   6   7
@@ -71,7 +71,7 @@ class Board():
 
     # * returns a list of tuples of all the available moves for a given square on the board
 
-    def getMoves(self, x, y):
+    def getMoves(self, x:int, y:int) -> list:
         moves = []
         # check all the empty squares that are on the board and can be accessed from (x, y)
         # if self.turn == -1: white to move and
@@ -106,7 +106,7 @@ class Board():
 
     # * returns a list of tuples of all the available captures (jumps) for a given square on the board
 
-    def getJumps(self, x, y):
+    def getJumps(self, x:int, y:int) -> list:
         jumps = []
         # if the piece on (x, y) is a man or a king
         if self.board[x][y] in (self.turn, 2*self.turn):
@@ -134,18 +134,18 @@ class Board():
 
     # * validiates the input move, if its legal it updates the board accordingly
 
-    def move(self, x, y, newX, newY, comp=False):
+    def move(self, x:int, y:int, newX:int, newY:int, comp:bool=False):
         # stores al the availeble jumps in a dictionary
         jumpers = dict()
 
         # generate all possible captures
         for i in range(8):
             for j in range(8):
-                if len(self.getJumps(x, y)):
+                if len(self.getJumps(i, j)):
                     jumpers[(i, j)] = self.getJumps(i, j)
 
         # if there are available captures
-        if len(jumpers) > 0:
+        if jumpers:
             # print(jumpers)
             if (newX, newY) in jumpers[(x, y)]:
                 self.board[x][y] = 0
@@ -157,21 +157,18 @@ class Board():
                 # print(self.getJumps(newX, newY))
                 if len(self.getJumps(newX, newY)) == 1:
                     self.move(newX, newY, self.getJumps(newX, newY)[0][0], self.getJumps(newX, newY)[0][1])
-                elif len(self.getJumps(newX, newY)) == 2:
-                    if not comp:
-                        self.display_board()
-                        direction = str(input("You have two possible captures, would you like to go 'right' or 'left'? "))
-                        for i in range(10):
-                            if direction == 'right':
-                                self.move(newX, newY, self.getJumps(newX, newY)[0][0], self.getJumps(newX, newY)[0][1])
-                                break
-                            elif direction == 'left':
-                                self.move(newX, newY, self.getJumps(newX, newY)[1][0], self.getJumps(newX, newY)[1][1])
-                                break
-                            else:
-                                print("Not a valid direction, please enter 'left' or 'right'")
-                    else:
-                        pass
+                elif len(self.getJumps(newX, newY)) == 2 and not comp:
+                    self.display_board()
+                    direction = str(input("You have two possible captures, would you like to go 'right' or 'left'? "))
+                    for i in range(10):
+                        if direction == 'right':
+                            self.move(newX, newY, self.getJumps(newX, newY)[0][0], self.getJumps(newX, newY)[0][1])
+                            break
+                        elif direction == 'left':
+                            self.move(newX, newY, self.getJumps(newX, newY)[1][0], self.getJumps(newX, newY)[1][1])
+                            break
+                        else:
+                            print("Not a valid direction, please enter 'left' or 'right'")
                 else:
                     self.turn = -self.turn
             else:
@@ -183,7 +180,8 @@ class Board():
                 self.turn = -self.turn
                 self.makeKing()
             else:
-                print("invalid move, either there isnt a piece there or the piece cannot move to the given position")
+                pass
+                # print("invalid move, either there isnt a piece there or the piece cannot move to the given position")
 
     # * converts last row pieces to kings
 
@@ -219,8 +217,20 @@ class Board():
     # * returns a numeric value representing the board position
     # TODO add heatmap
 
+    # motivates pieces to reach the last rank
     def _weighted_value(self, x, y):
-        return (5 + 7-x)*self.board[x][y] if self.board[x][y] in (1, -1) else 5*self.board[x][y]+10
+        player = self.board[x][y]
+        if player == 1:
+            return 5*player + (7-x)
+        elif player == 2:
+            return 5*player + 10
+        elif player == -1:
+            return 5*player - x
+        elif player == -2:
+            return 5*player -10
+        else:
+            return 0
+        # return (5 + (1+player)*7 + player*x)*player if player in (1, -1) else 5*player+10
 
 
     def utility(self):
@@ -367,13 +377,13 @@ def main():
     board = Board()
     while True:
         board.display_board()
+        print(f'utility: {board.utility()}')
         # t1 = time.time()
         # print(f'minimax: {board.minimax(4, 1)}')
         # print(f'it took {time.time() - t1} seconds to run')
         t2 = time.time()
-        print(f'best_move: {board.get_best_move(6, 1)}')
+        print(f'best_move: {board.get_best_move(8, 1)}')
         print(f'it took {time.time() - t2} seconds to run')
-        print(f'utility: {board.utility()}')
         print(f"turn: {board._convert(board.turn)}")
         x = int(input("Enter vertical cooardinate of the piece you wish to move "))
         y = int(input("Enter horizontal cooardinate of the piece you wish to move "))
