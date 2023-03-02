@@ -137,17 +137,19 @@ class Board():
     def move(self, x:int, y:int, newX:int, newY:int, comp:bool=False):
         # stores al the availeble jumps in a dictionary
         jumpers = dict()
+        moves = dict()
 
         # generate all possible captures
         for i in range(8):
             for j in range(8):
-                if len(self.getJumps(i, j)):
-                    jumpers[(i, j)] = self.getJumps(i, j)
+                if (jump := self.getJumps(i, j)):
+                    jumpers[(i, j)] = jump
+                if (move := self.getMoves(i, j)):
+                    moves[(i, j)] = move
 
         # if there are available captures
         if jumpers:
-            # print(jumpers)
-            if (newX, newY) in jumpers[(x, y)]:
+            if ((newX, newY) in jumpers[(x, y)]):
                 self.board[x][y] = 0
                 self.board[newX][newY] = self.turn
                 self.board[int((x+newX)/2)][int((y+newY)/2)] = 0
@@ -242,7 +244,7 @@ class Board():
 
     # * implementation of the minimax algorithm
 
-    def minimax(self, depth, alpha, beta, player):
+    def minimax(self, depth:int, alpha:float, beta:float, player:int) -> int:
         if self.checkWinner():
             return self.checkWinner()
 
@@ -260,9 +262,9 @@ class Board():
         # generate all legal moves
         for i in range(8):
             for j in range(8):
-                if jump := self.getJumps(i, j):
+                if (jump := self.getJumps(i, j)):
                     jumps[(i, j)] = jump
-                if move := self.getMoves(i, j):
+                if (move := self.getMoves(i, j)):
                     moves[(i, j)] = move
 
         if jumps:
@@ -318,7 +320,7 @@ class Board():
     # TODO
     
     def get_best_move(self, depth, player):
-        best_move = (-1, -1, -1, -1)
+        best_move = None
 
         if player == 1:
             value = -float('inf')
@@ -330,9 +332,9 @@ class Board():
 
         for i in range(8):
             for j in range(8):
-                if jump := self.getJumps(i, j):
+                if (jump := self.getJumps(i, j)):
                     jumps[(i, j)] = jump
-                if move := self.getMoves(i, j):
+                if (move := self.getMoves(i, j)):
                     moves[(i, j)] = move
 
         if jumps:
