@@ -376,23 +376,32 @@ class Board():
 
 
 def main():
+    play_mode = input('Would you like to play the engine? (y/n) ')
+    if play_mode == 'y':
+        difficulty = int(input('How hard do you want it to be? (1-9) '))
     board = Board()
+    i = 1
     while True:
         board.display_board()
-        print(f'utility: {board.utility()}')
-        # t1 = time.time()
-        # print(f'minimax: {board.minimax(4, 1)}')
-        # print(f'it took {time.time() - t1} seconds to run')
-        t2 = time.time()
-        print(f'best_move: {board.get_best_move(8, 1)}')
-        print(f'it took {time.time() - t2} seconds to run')
         print(f"turn: {board._convert(board.turn)}")
-        x = int(input("Enter vertical cooardinate of the piece you wish to move "))
-        y = int(input("Enter horizontal cooardinate of the piece you wish to move "))
-        newX = int(input("Enter vertical cooardinate of the spot you wish to move to "))
-        newY = int(input("Enter horizontal cooardinate of the spot you wish to move to "))
 
-        board.move(x, y, newX, newY)
+        if i % 2:
+            x = int(input("Enter vertical cooardinate of the piece you wish to move "))
+            y = int(input("Enter horizontal cooardinate of the piece you wish to move "))
+            newX = int(input("Enter vertical cooardinate of the spot you wish to move to "))
+            newY = int(input("Enter horizontal cooardinate of the spot you wish to move to "))
+            board.move(x, y, newX, newY)
+
+        else:
+            if play_mode == 'y':
+                comp_move = board.get_best_move(difficulty, -1)
+                board.move(comp_move[0], comp_move[1], comp_move[2], comp_move[3])
+            else:
+                x = int(input("Enter vertical cooardinate of the piece you wish to move "))
+                y = int(input("Enter horizontal cooardinate of the piece you wish to move "))
+                newX = int(input("Enter vertical cooardinate of the spot you wish to move to "))
+                newY = int(input("Enter horizontal cooardinate of the spot you wish to move to "))
+                board.move(x, y, newX, newY)
 
         if board.checkWinner() == float('inf'):
             print("Black won")
@@ -401,7 +410,7 @@ def main():
             print("White won")
             break
 
-    # nagyon szeretem a petyit
+        i += 1
 
 
 if __name__ == "__main__":
